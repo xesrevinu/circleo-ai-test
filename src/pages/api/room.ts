@@ -9,6 +9,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import * as Replicate from '@/core/replicate/client';
 
+export const config = {
+  runtime: 'edge', // this is a pre-requisite
+  regions: ['iad1'], // only execute this function on iad1
+};
+
 const InputPostSchema = Schema.struct({
   image: Schema.string,
   prompt: Schema.string,
