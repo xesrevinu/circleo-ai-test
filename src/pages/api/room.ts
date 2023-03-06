@@ -4,6 +4,7 @@ import * as Logger from '@effect/io/Logger';
 import * as LoggerLevel from '@effect/io/Logger/Level';
 import * as SchemaParser from '@effect/schema/Parser';
 import * as Schema from '@effect/schema/Schema';
+import NextCors from 'nextjs-cors';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import * as Replicate from '@/core/replicate/client';
@@ -18,9 +19,12 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   // cors set 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  await NextCors(req, res, {
+    // Options
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  });
 
   const program = pipe(
     SchemaParser.decode(InputPostSchema)(req.body),
