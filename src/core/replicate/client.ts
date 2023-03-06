@@ -114,7 +114,7 @@ export interface ReplicateClient {
 
 export const makeClient = () => {
   return T.gen(function* ($) {
-    const key = yield* $(ConfigProvider.fromEnv().load(REPLICATE_API_KEY));
+    const key = process.env.REPLICATE_API_KEY;
 
     function generate({
       a_prompt,
@@ -140,7 +140,7 @@ export const makeClient = () => {
               'Content-Type': 'application/json',
               Authorization: `Token ${key}`,
             },
-            data: {
+            body: JSON.stringify({
               version,
               input: {
                 image: imageUrl,
@@ -149,7 +149,7 @@ export const makeClient = () => {
                 n_prompt,
                 detect_resolution,
               },
-            },
+            }),
           }
         ),
         T.flatMap((_) => {
