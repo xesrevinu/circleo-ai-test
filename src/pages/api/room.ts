@@ -45,6 +45,8 @@ export default async function handler(req: NextRequest) {
     );
 
     result = await T.runPromiseEither(program);
+
+    console.log(result);
   }
 
   // cors set
