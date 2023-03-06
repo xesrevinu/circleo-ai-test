@@ -20,35 +20,39 @@ const InputPostSchema = Schema.struct({
 });
 
 export default async function handler(req: NextRequest) {
-  const program = pipe(
-    SchemaParser.decode(InputPostSchema)(await req.json()),
-    T.fromEither,
-    T.flatMap((body) =>
-      Replicate.generate({
-        version:
-          "854e8727697a057c525cdb45ab037f64ecca770a1769cc52287c2e56472a247b",
-        a_prompt:
-          "best quality, extremely detailed, photo from Pinterest, interior, ultra-detailed, award-winning, Photography, real-life",
-        n_prompt:
-          "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
-        imageUrl: body.image,
-        prompt: body.prompt,
-        detect_resolution: 1024,
-      })
-    ),
-    Logger.withMinimumLogLevel(LoggerLevel.All),
-    T.provideLayer(Replicate.live),
-    T.tapDefect((_) => T.logErrorCause(_))
-  );
+  let result: any = ''
 
-  const result = await T.runPromiseEither(program);
+  if (req.method === 'POST') {
+    const program = pipe(
+      SchemaParser.decode(InputPostSchema)(await req.json()),
+      T.fromEither,
+      T.flatMap((body) =>
+        Replicate.generate({
+          version:
+            "854e8727697a057c525cdb45ab037f64ecca770a1769cc52287c2e56472a247b",
+          a_prompt:
+            "best quality, extremely detailed, photo from Pinterest, interior, ultra-detailed, award-winning, Photography, real-life",
+          n_prompt:
+            "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
+          imageUrl: body.image,
+          prompt: body.prompt,
+          detect_resolution: 1024,
+        })
+      ),
+      Logger.withMinimumLogLevel(LoggerLevel.All),
+      T.provideLayer(Replicate.live),
+      T.tapDefect((_) => T.logErrorCause(_))
+    );
+
+    result = await T.runPromiseEither(program);
+  }
 
   // cors set
   return cors(
     req,
-    result._tag === "Right"
+    req.method === 'POST' ? result._tag === "Right"
       ? new NextResponse(JSON.stringify(result.right))
-      : new NextResponse(null, { status: 500 }),
+      : new NextResponse(null, { status: 500 }) : new NextResponse(null, { status: 405 }),
     {
       methods: ['GET', 'HEAD', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']
     }
