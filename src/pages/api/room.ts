@@ -48,6 +48,9 @@ export default async function handler(req: NextRequest) {
     req,
     result._tag === "Right"
       ? new NextResponse(JSON.stringify(result.right))
-      : new NextResponse(null, { status: 500 })
+      : new NextResponse(null, { status: 500 }),
+    {
+      methods: ['GET', 'HEAD', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']
+    }
   );
 }
